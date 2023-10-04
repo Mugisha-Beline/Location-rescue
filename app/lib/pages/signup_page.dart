@@ -1,69 +1,108 @@
 import 'package:flutter/material.dart';
 
-class SignUpPage extends StatefulWidget {
+void main() {
+  runApp(SignUpPage());
+}
+
+class SignUpPage extends StatelessWidget {
   const SignUpPage({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
-  _SignUpPageState createState() => _SignUpPageState();
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('Sign Page'),
+          backgroundColor: Colors.teal,
+        ),
+        body: Center(
+          child: Container(
+            width: 500.0,
+            height: 500.0,
+            child: const Card(
+              elevation: 15.0,
+              child: SignUpForm(),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
-class _SignUpPageState extends State<SignUpPage> {
-  // Define controllers for text input fields
-  final TextEditingController _nameController = TextEditingController();
-  TextEditingController _emailController = TextEditingController();
-  TextEditingController _passwordController = TextEditingController();
+class SignUpForm extends StatelessWidget {
+  const SignUpForm({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Sign Up'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            // Name TextField
-            TextField(
-              controller: _nameController,
-              decoration: InputDecoration(
-                labelText: 'Name',
+    return Container(
+      padding: const EdgeInsets.all(20.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          const Center(
+            // Center the title text
+            child: Text(
+              'Sign Up',
+              style: TextStyle(
+                fontSize: 28.0,
+                color: Colors.green,
               ),
             ),
-            SizedBox(height: 16.0),
-
-            // Email TextField
-            TextField(
-              controller: _emailController,
-              decoration: InputDecoration(
-                labelText: 'Email',
+          ),
+          const SizedBox(height: 20.0),
+          TextFormField(
+            decoration: const InputDecoration(
+              labelText: 'Full Name',
+            ),
+            keyboardType: TextInputType.name,
+          ),
+          const SizedBox(height: 20.0),
+          TextFormField(
+            decoration: const InputDecoration(
+              labelText: 'Email',
+              prefixIcon: Icon(Icons.email),
+            ),
+            keyboardType: TextInputType.emailAddress,
+          ),
+          const SizedBox(height: 15.0),
+          TextFormField(
+            decoration: const InputDecoration(
+              labelText: 'Password',
+              prefixIcon: Icon(Icons.lock),
+            ),
+            obscureText: true,
+          ),
+          const SizedBox(height: 30.0),
+          ElevatedButton(
+            onPressed: () {
+              // Add sign up logic here
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFe6aa07),
+              minimumSize: const Size(double.infinity, 50.0),
+            ),
+            child: const Text('Sign Up'),
+          ),
+          const SizedBox(height: 20.0),
+          const Text(
+            'Already have an account?',
+            style: TextStyle(
+              color: Colors.teal,
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              // Add login logic here
+            },
+            child: const Text(
+              'Login',
+              style: TextStyle(
+                color: Colors.teal,
               ),
             ),
-            SizedBox(height: 16.0),
-
-            // Password TextField
-            TextField(
-              controller: _passwordController,
-              decoration: InputDecoration(
-                labelText: 'Password',
-              ),
-              obscureText: true, // Hide password text
-            ),
-            SizedBox(height: 24.0),
-
-            // Sign Up Button
-            ElevatedButton(
-              onPressed: () {
-                // Handle sign-up logic here
-                // You can access the input values using _nameController.text, _emailController.text, and _passwordController.text
-              },
-              child: const Text('Sign Up'),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
