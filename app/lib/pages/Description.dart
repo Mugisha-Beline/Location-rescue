@@ -1,30 +1,28 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const DescriptionScreenApp());
+  runApp(const DetailsPageApp());
 }
 
-class DescriptionScreenApp extends StatelessWidget {
-  const DescriptionScreenApp({Key? key});
+class DetailsPageApp extends StatelessWidget {
+  const DetailsPageApp({Key? key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Location App',
       theme: ThemeData(
-        primarySwatch: Color.fromARGB(255, 45, 116, 192),
+        primarySwatch: Colors.lightGreen,
       ),
-      home: const DescriptionScreenApp(title: 'Places and Description'),
+      home: const DetailsPage(title: 'Places and Description'),
     );
 
 }
 }
 
 
-/* This class is similar to MyApp instead it
-returns Scaffold Widget */
-class DescriptionScreenApp extends StatelessWidget {
-  const DescriptionScreenApp({Key? key, required this.title}) : super(key: key);
+class DetailsPage extends StatelessWidget {
+  const DetailsPage({Key? key, required this.title}) : super(key: key);
   final String title;
  
   @override
@@ -33,13 +31,17 @@ class DescriptionScreenApp extends StatelessWidget {
       appBar: AppBar(
         title: Text(title),
       ),
-      // Sets the content to the
-      // center of the application page
-      body: const Center(
-          // Sets the content of the Application
-          child: Text(
-        'Welcome to YOur location provider!',
-      )),
-    );
+
+      body:
+/* https://docs.flutter.dev/ui/layout */
+      
+       GridView.count(
+        
+        crossAxisCount: 2,
+        children: List.generate(4, (index){
+          return Center(
+            child: Text('Hotel Name $index',
+            style: Theme.of(context).textTheme.headlineSmall,),);
+        }), ),);
   }
 }
