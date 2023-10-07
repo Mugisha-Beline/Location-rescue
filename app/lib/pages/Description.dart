@@ -34,6 +34,9 @@ class DetailsPage extends StatelessWidget {
 
       body:
 /* https://docs.flutter.dev/ui/layout */
+       /* const Center(child: 
+       Text('Select a Place for location'),
+       ) */
       
        GridView.count(
         
