@@ -20,6 +20,9 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blue,
@@ -44,8 +47,8 @@ class HomeScreen extends StatelessWidget {
         ),
       ),
       body: Container(
-        width: 500.0,  // Set the width
-        height: 500.0, // Set the height
+        width: screenWidth,
+        height: screenHeight,
         child: Padding(
           padding: const EdgeInsets.all(24.0),
           child: Column(

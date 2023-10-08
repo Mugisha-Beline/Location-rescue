@@ -20,6 +20,10 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Get the screen size
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('FEEDBACK FORM'),
@@ -41,8 +45,8 @@ class HomeScreen extends StatelessWidget {
         ),
       ),
       body: Container(
-        width: 500.0,
-        height: 500.0,
+        width: screenWidth,
+        height: screenHeight,
         padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -63,7 +67,7 @@ class HomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16.0),
             SizedBox(
-              width: double.infinity,
+              width: screenWidth,  // Adjusted to screen width
               child: ElevatedButton.icon(
                 onPressed: () {},
                 icon: const Icon(Icons.create),

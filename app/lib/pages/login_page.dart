@@ -5,10 +5,13 @@ void main() {
 }
 
 class LoginPage extends StatelessWidget {
-  const LoginPage({super.key});
+  const LoginPage({Key? key});
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
@@ -17,8 +20,8 @@ class LoginPage extends StatelessWidget {
         ),
         body: Center(
           child: Container(
-            width: 500.0,
-            height: 500.0,
+            width: screenWidth > 500 ? 500.0 : screenWidth,
+            height: screenHeight > 500 ? 500.0 : screenHeight,
             child: Card(
               elevation: 15.0,
               child: LoginForm(),
@@ -31,7 +34,7 @@ class LoginPage extends StatelessWidget {
 }
 
 class LoginForm extends StatelessWidget {
-  const LoginForm({super.key});
+  const LoginForm({Key? key});
 
   @override
   Widget build(BuildContext context) {
