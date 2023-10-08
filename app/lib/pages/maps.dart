@@ -1,30 +1,30 @@
 import 'package:flutter/material.dart';
  
 void main() {
-  runApp(const MyApp());
+  runApp(const MapApp());
 }
  
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+class MapApp extends StatelessWidget {
+  const MapApp({Key? key}) : super(key: key);
  
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
 
-      title: 'Hello World Demo Application',
+      title: 'Location Application',
       theme: ThemeData(
         primarySwatch: Colors.lightGreen,
       ),
       // Inner UI of the application
-      home: const MyHomePage(title: 'Home page'),
+      home: const MapPage(title: 'Google Map'),
     );
   }
 }
  
 
-class MyHomePage extends StatelessWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
+class MapPage extends StatelessWidget {
+  const MapPage({Key? key, required this.title}) : super(key: key);
   final String title;
  
   @override
@@ -35,9 +35,9 @@ class MyHomePage extends StatelessWidget {
       ),
       
       body: const Center(
-          // Sets the content of the Application
+          
           child: Text(
-        'Welcome to GeeksForGeeks!',
+        'Here is a map to your location',
       )),
     );
   }
