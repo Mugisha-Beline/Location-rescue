@@ -1,3 +1,5 @@
+import 'package:app/pages/Feedback_page.dart';
+import 'package:app/pages/Home_page.dart';
 import 'package:app/pages/login_page.dart';
 import 'package:flutter/material.dart';
 import 'package:app/pages/signup_page.dart';
@@ -19,12 +21,14 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       // Set the initial route or add it to your routes map
-      initialRoute: '/Description',
+      initialRoute: '/Home',
       routes: {
         '/login': (context) => const LoginPage(), // loginPage route
         '/signup': (context) => const SignUpPage(),
         '/Description': (context) => const DescriptionPage(),
         '/Map': (content) => const MapPage(),
+        '/Home':(context) => const HomeScreenApp(),
+        '/Feedback':(context) => const FeedbackPage()
         // Add more routes here as needed
       },
     );
