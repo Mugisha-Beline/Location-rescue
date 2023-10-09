@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const HomeScreenApp());
+  runApp(const FeedbackPage());
 }
 
-class HomeScreenApp extends StatelessWidget {
-  const HomeScreenApp({Key? key});
+class FeedbackPage extends StatelessWidget {
+  const FeedbackPage({Key? key});
 
   @override
   Widget build(BuildContext context) {
