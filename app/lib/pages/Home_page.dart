@@ -1,22 +1,65 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'description.dart';
 
-void main() {
-  runApp(const HomeScreenApp());
-}
-
-class HomeScreenApp extends StatelessWidget {
-  const HomeScreenApp({Key? key});
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: HomeScreen(),
-    );
-  }
+  _HomeScreenState createState() => _HomeScreenState();
 }
 
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({Key? key});
+class _HomeScreenState extends State<HomeScreen> {
+  final TextEditingController provinceController = TextEditingController();
+  final TextEditingController districtController = TextEditingController();
+  final TextEditingController categoryController = TextEditingController();
+
+  final CollectionReference searchCollection =
+      FirebaseFirestore.instance.collection('searches');
+
+  void _searchButtonPressed(BuildContext context) async {
+    try {
+      final String province = provinceController.text.trim();
+      final String district = districtController.text.trim();
+      final String category = categoryController.text.trim();
+
+      if (province.isNotEmpty && district.isNotEmpty && category.isNotEmpty) {
+        // Perform CRUD operation - save the search parameters to Firestore
+        await searchCollection.add({
+          'province': province,
+          'district': district,
+          'category': category,
+          'timestamp': FieldValue.serverTimestamp(),
+        });
+
+        // Navigate to the DescriptionPage with search parameters
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => DescriptionPage(
+              province: province,
+              district: district,
+              category: category,
+            ),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please enter all the fields.'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error during search: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('An error occurred. Please try again.'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,11 +81,11 @@ class HomeScreen extends StatelessWidget {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            // Handle back button press
+            Navigator.pop(context); // Handle back button press
           },
         ),
         title: const Text(
-          'home',
+          'Home',
           textAlign: TextAlign.center,
         ),
       ),
@@ -70,22 +113,25 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16.0),
-              const TextField(
-                decoration: InputDecoration(
+              TextField(
+                controller: provinceController,
+                decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   labelText: 'Enter your Rwanda province',
                 ),
               ),
               const SizedBox(height: 16.0),
-              const TextField(
-                decoration: InputDecoration(
+              TextField(
+                controller: districtController,
+                decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   labelText: 'Enter your district',
                 ),
               ),
               const SizedBox(height: 16.0),
-              const TextField(
-                decoration: InputDecoration(
+              TextField(
+                controller: categoryController,
+                decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   labelText: 'Enter category',
                 ),
@@ -94,7 +140,9 @@ class HomeScreen extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  onPressed: () {},
+                  onPressed: () {
+                    _searchButtonPressed(context);
+                  },
                   icon: const Icon(Icons.search, color: Colors.black),
                   label: const Text('Search'),
                   style: ElevatedButton.styleFrom(

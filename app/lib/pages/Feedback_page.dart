@@ -1,26 +1,19 @@
 import 'package:flutter/material.dart';
+import '../datamanagers/feedback_manager.dart';
 
-void main() {
-  runApp(const FeedbackPage());
+class FeedbackPage extends StatefulWidget {
+  const FeedbackPage({Key? key}) : super(key: key);
+
+  @override
+  _FeedbackPageState createState() => _FeedbackPageState();
 }
 
-class FeedbackPage extends StatelessWidget {
-  const FeedbackPage({Key? key});
+class _FeedbackPageState extends State<FeedbackPage> {
+  TextEditingController feedbackController = TextEditingController();
+  FeedbackManager feedbackManager = FeedbackManager();
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: HomeScreen(),
-    );
-  }
-}
-
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({Key? key});
-
-  @override
-  Widget build(BuildContext context) {
-    // Get the screen size
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
@@ -40,7 +33,7 @@ class HomeScreen extends StatelessWidget {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            // Handle back button press
+            Navigator.pop(context);
           },
         ),
       ),
@@ -59,17 +52,50 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16.0),
-            const TextField(
-              decoration: InputDecoration(
+            TextField(
+              controller: feedbackController,
+              maxLines: 5,
+              decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 labelText: 'Feedback..........',
               ),
             ),
             const SizedBox(height: 16.0),
             SizedBox(
-              width: screenWidth,  // Adjusted to screen width
+              width: screenWidth,
               child: ElevatedButton.icon(
-                onPressed: () {},
+                onPressed: () async {
+                  String feedbackText = feedbackController.text.trim();
+
+                  if (feedbackText.isNotEmpty) {
+                    bool success = await feedbackManager.createFeedback(feedbackText);
+
+                    if (success) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Feedback created successfully.'),
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+
+                      Navigator.pop(context);
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Failed to create feedback. Please try again.'),
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                    }
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Please enter your feedback.'),
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                  }
+                },
                 icon: const Icon(Icons.create),
                 label: const Text('CREATE FEEDBACK'),
                 style: ElevatedButton.styleFrom(

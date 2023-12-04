@@ -1,132 +1,163 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart' as FirebaseAuth;
+import '../datamanagers/database_manager.dart';
+import 'maps.dart';
 
-void main() {
-  runApp(const DescriptionPage());
-}
+class DescriptionPage extends StatefulWidget {
+  final String province;
+  final String district;
+  final String category;
 
-class DescriptionPage extends StatelessWidget {
-  const DescriptionPage({Key? key});
+  const DescriptionPage({
+    Key? key,
+    required this.province,
+    required this.district,
+    required this.category,
+  }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: HomeScreen(),
-    );
-  }
+  _DescriptionPageState createState() => _DescriptionPageState();
 }
 
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({Key? key});
+class _DescriptionPageState extends State<DescriptionPage> {
+  late final DatabaseManager _db;
+  late List<LocationItem> locationItems = [];
+
+  @override
+  void initState() {
+    super.initState();
+    // Check if the user is authenticated
+    FirebaseAuth.User? user = FirebaseAuth.FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      // Redirect to login page
+      Navigator.pushReplacementNamed(context, '/login');
+    } else {
+      // User is authenticated, proceed with initializing the page
+      _db = DatabaseManager(uid: user.uid);
+      loadLocationItems();
+    }
+  }
+
+  Future<void> loadLocationItems() async {
+    try {
+      locationItems = await _db.getLocationItems(
+        province: widget.province,
+        district: widget.district,
+        category: widget.category,
+      );
+      setState(() {});
+    } catch (e) {
+      print('Error loading location items: $e');
+    }
+  }
+
+  void _viewOnMapButtonPressed() {
+    // Navigate to the MapPage with location items
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => MapPage(locationItems: locationItems),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.blue,
-        iconTheme: const IconThemeData(color: Colors.white),
-        elevation: 4.0,
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1.0),
-          child: Container(
-            color: Colors.black,
-            height: 1.0,
+        title: Text('Locations - ${widget.category} in ${widget.district}'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.map),
+            onPressed: _viewOnMapButtonPressed,
           ),
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            // Handle back button press
-          },
-        ),
-        title: const Text(
-          'Paces and Description',
-          textAlign: TextAlign.center,
-        ),
+        ],
       ),
       body: Container(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text(
-              'Select a place for a location',
-              style: TextStyle(
-                fontSize: 24.0,
-                color: Color(0xFFe6aa60),
-              ),
-            ),
             const SizedBox(height: 16.0),
-            const Text(
-              'Hotels',
+            Text(
+              widget.category,
               style: TextStyle(
                 fontSize: 18.0,
+                fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 16.0),
-            // Card list for hotels
-            GridView.builder(
-              shrinkWrap: true,
-              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: 200.0,
-                childAspectRatio: 0.7,
+            Expanded(
+              child: ListView.builder(
+                itemCount: locationItems.length,
+                itemBuilder: (context, index) {
+                  return LocationItemCard(item: locationItems[index]);
+                },
               ),
-              itemCount: 3, // Adjust this to the number of hotels
-              itemBuilder: (context, index) {
-                return Card(
-                  elevation: 2.0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.0),
-                  ),
-                  color: const Color(0xFFFFFFFF),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Container(
-                        height: 120,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(6.0),
-                          image: const DecorationImage(
-                            image: AssetImage('assets/hotel_image.jpg'),
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-                      const Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Hotel Name',
-                              style: TextStyle(
-                                fontSize: 12.0,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            SizedBox(height: 4.0),
-                            Text(
-                              'Description:',
-                              style: TextStyle(
-                                fontSize: 10.0,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              'Body text lorem ipsum doler',
-                              style: TextStyle(
-                                fontSize: 10.0,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class LocationItemCard extends StatelessWidget {
+  final LocationItem item;
+
+  const LocationItemCard({Key? key, required this.item}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 2.0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12.0),
+      ),
+      color: const Color(0xFFFFFFFF),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Container(
+            height: 120,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(6.0),
+              image: DecorationImage(
+                image: AssetImage('assets/location_image.jpg'), // Change this based on your images
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.name,
+                  style: TextStyle(
+                    fontSize: 12.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 4.0),
+                Text(
+                  'Description:',
+                  style: TextStyle(
+                    fontSize: 10.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  item.description,
+                  style: TextStyle(
+                    fontSize: 10.0,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

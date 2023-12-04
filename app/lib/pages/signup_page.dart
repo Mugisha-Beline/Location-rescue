@@ -1,30 +1,28 @@
+// signup_page.dart
 import 'package:flutter/material.dart';
+import 'package:app/helper/helper_function.dart';
+import 'package:app/services/auth_service.dart';
 
-void main() {
-  runApp(SignUpPage());
-}
+class SignupPage extends StatelessWidget {
+  final AuthService authService;
 
-class SignUpPage extends StatelessWidget {
-  const SignUpPage({Key? key});
+  SignupPage({required this.authService, Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Sign Page'),
+          title: const Text('Sign Up Page'),
           backgroundColor: Colors.teal,
         ),
         body: Center(
           child: Container(
-            width: screenWidth > 500 ? 500.0 : screenWidth,
-            height: screenHeight > 500 ? 500.0 : screenHeight,
-            child: const Card(
+            width: MediaQuery.of(context).size.width > 500 ? 500.0 : MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height > 500 ? 500.0 : MediaQuery.of(context).size.height,
+            child: Card(
               elevation: 15.0,
-              child: SignUpForm(),
+              child: SignupForm(authService: authService),
             ),
           ),
         ),
@@ -33,8 +31,68 @@ class SignUpPage extends StatelessWidget {
   }
 }
 
-class SignUpForm extends StatelessWidget {
-  const SignUpForm({Key? key});
+class SignupForm extends StatefulWidget {
+  final AuthService authService;
+
+  const SignupForm({required this.authService, Key? key}) : super(key: key);
+
+  @override
+  _SignupFormState createState() => _SignupFormState();
+}
+
+class _SignupFormState extends State<SignupForm> {
+  final TextEditingController _fullNameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  bool _loading = false;
+
+  _signUp() async {
+    setState(() {
+      _loading = true;
+    });
+
+    try {
+      String fullName = _fullNameController.text.trim();
+      String email = _emailController.text.trim();
+      String password = _passwordController.text.trim();
+
+      if (fullName.isNotEmpty && email.isNotEmpty && password.isNotEmpty) {
+        dynamic result = await widget.authService.registerUserWithEmailandPassword(
+          fullName,
+          email,
+          password,
+        );
+
+        if (result is bool && result) {
+          // User registration successful
+          await HelperFunctions.saveUserLoggedInStatus(true);
+          await HelperFunctions.saveUserEmailSF(email);
+          await HelperFunctions.saveUserNameSF(fullName);
+
+          // Navigate to login page
+          Navigator.pushReplacementNamed(context, '/login');
+        } else {
+          // Handle registration failure
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('Registration failed. Please try again.'),
+            duration: Duration(seconds: 2),
+          ));
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Please enter all the fields.'),
+          duration: Duration(seconds: 2),
+        ));
+      }
+    } catch (e) {
+      print('Error during signup: $e');
+    } finally {
+      setState(() {
+        _loading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +102,6 @@ class SignUpForm extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           const Center(
-            // Center the title text
             child: Text(
               'Sign Up',
               style: TextStyle(
@@ -55,6 +112,7 @@ class SignUpForm extends StatelessWidget {
           ),
           const SizedBox(height: 20.0),
           TextFormField(
+            controller: _fullNameController,
             decoration: const InputDecoration(
               labelText: 'Full Name',
             ),
@@ -62,6 +120,7 @@ class SignUpForm extends StatelessWidget {
           ),
           const SizedBox(height: 20.0),
           TextFormField(
+            controller: _emailController,
             decoration: const InputDecoration(
               labelText: 'Email',
               prefixIcon: Icon(Icons.email),
@@ -70,6 +129,7 @@ class SignUpForm extends StatelessWidget {
           ),
           const SizedBox(height: 15.0),
           TextFormField(
+            controller: _passwordController,
             decoration: const InputDecoration(
               labelText: 'Password',
               prefixIcon: Icon(Icons.lock),
@@ -78,14 +138,12 @@ class SignUpForm extends StatelessWidget {
           ),
           const SizedBox(height: 30.0),
           ElevatedButton(
-            onPressed: () {
-              // Add sign up logic here
-            },
+            onPressed: _loading ? null : _signUp,
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFe6aa07),
               minimumSize: const Size(double.infinity, 50.0),
             ),
-            child: const Text('Sign Up'),
+            child: _loading ? const CircularProgressIndicator() : const Text('Sign Up'),
           ),
           const SizedBox(height: 20.0),
           const Text(
@@ -95,8 +153,9 @@ class SignUpForm extends StatelessWidget {
             ),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               // Add login logic here
+              Navigator.pushReplacementNamed(context, '/login');
             },
             child: const Text(
               'Login',

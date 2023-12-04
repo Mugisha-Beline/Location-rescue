@@ -1,103 +1,59 @@
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import '../datamanagers/database_manager.dart';
 
-void main() {
-  runApp(const MapPage());
+class MapPage extends StatefulWidget {
+  final List<LocationItem> locationItems;
+
+  const MapPage({Key? key, required this.locationItems}) : super(key: key);
+
+  @override
+  _MapPageState createState() => _MapPageState();
 }
 
-class MapPage extends StatelessWidget {
-  const MapPage({Key? key});
+class _MapPageState extends State<MapPage> {
+  late GoogleMapController mapController;
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: HomeScreen(),
-    );
-  }
-}
-
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({Key? key});
-
-  @override
-  Widget build(BuildContext context) {
-    // Get the screen size
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Google Map'),
-        backgroundColor: Colors.blue,
-        iconTheme: const IconThemeData(color: Colors.white),
-        elevation: 4.0,
-        bottom: const PreferredSize(
-          preferredSize: Size.fromHeight(1.0),
-          child: Divider(
-            color: Colors.black,
-            height: 1.0,
-          ),
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            // Handle back button press
-          },
-        ),
+        title: Text('Map View'),
       ),
-      body: Container(
-        width: screenWidth,
-        height: screenHeight,
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () {},
-                icon: const Icon(Icons.add),
-                label: const Text('MORE DETAILS ABOUT HOTEL'),
-                style: ElevatedButton.styleFrom(
-                  onPrimary: Colors.black,
-                  primary: const Color(0xFFe6aa07),
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(4.0)),
-                  ),
-                  elevation: 4.0,
-                ),
-              ),
-            ),
-            const SizedBox(height: 16.0), // Adding space
-            const Text(
-              'Check the Google Map below.',
-              style: TextStyle(
-                fontSize: 16.0,
-                color: Colors.black,
-              ),
-            ),
-            Spacer(), // Spacer to push the last button to the bottom
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: SizedBox(
-                width: 200.0,
-                child: ElevatedButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.check),
-                  label: const Text('DONE'),
-                  style: ElevatedButton.styleFrom(
-                    onPrimary: Colors.black,
-                    primary: const Color(0xFFe6aa07),
-                    shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(4.0)),
-                    ),
-                    elevation: 4.0,
-                  ),
-                ),
-              ),
-            ),
-          ],
+      body: GoogleMap(
+        onMapCreated: _onMapCreated,
+        initialCameraPosition: CameraPosition(
+          target: LatLng(0.0, 0.0), // Update with the default location
+          zoom: 10.0, // Adjust the initial zoom level
         ),
+        markers: _createMarkers(),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // Navigate to the FeedbackPage
+          Navigator.of(context).pushReplacementNamed('/feedback');
+        },
+        child: Icon(Icons.feedback),
       ),
     );
+  }
+
+  void _onMapCreated(GoogleMapController controller) {
+    setState(() {
+      mapController = controller;
+    });
+  }
+
+  Set<Marker> _createMarkers() {
+    return widget.locationItems.map((item) {
+      return Marker(
+        markerId: MarkerId(item.name),
+      
+        infoWindow: InfoWindow(
+          title: item.name,
+          snippet: item.description,
+        ),
+      );
+    }).toSet();
   }
 }
