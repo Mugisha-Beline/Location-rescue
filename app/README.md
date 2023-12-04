@@ -1,6 +1,8 @@
 # app
 
 A new Flutter project.
+# A link to the prototype of the app
+[Location rescue Prototype](https://previewer.adalo.com/9e4b8352-471b-4c7f-bc27-9c901b43a806)
 
 ## Getting Started
 
