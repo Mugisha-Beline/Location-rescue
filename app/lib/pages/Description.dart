@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart' as FirebaseAuth;
 import '../datamanagers/database_manager.dart';
@@ -20,6 +21,7 @@ class DescriptionPage extends StatefulWidget {
 }
 
 class _DescriptionPageState extends State<DescriptionPage> {
+  final Stream<QuerySnapshot> _usersStream = FirebaseFirestore.instance.collection('hotels').snapshots();
   late final DatabaseManager _db;
   late List<LocationItem> locationItems = [];
 
@@ -63,7 +65,19 @@ class _DescriptionPageState extends State<DescriptionPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return StreamBuilder<QuerySnapshot>(
+      stream: _usersStream,
+      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+       if (snapshot.hasError) {
+          return Text('Something went wrong');
+        }
+
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Text("Loading");
+
+        }
+        // print(snapshot.data()!.docs);
+        return Scaffold(
       appBar: AppBar(
         title: Text('Locations - ${widget.category} in ${widget.district}'),
         actions: [
@@ -76,8 +90,20 @@ class _DescriptionPageState extends State<DescriptionPage> {
       body: Container(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+      
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
+          children: [ 
+            SizedBox(height: 200.0, child: ListView(
+          children: snapshot.data!.docs.map((DocumentSnapshot document) {
+          Map<String, dynamic> data = document.data()! as Map<String, dynamic>;
+          print(data);
+            return ListTile(
+              title: Text(data['name']),
+              subtitle: Text(data['Cost'].toString()),
+            );
+          }).toList(),
+        ),)
+             ,
             const SizedBox(height: 16.0),
             Text(
               widget.category,
@@ -99,6 +125,8 @@ class _DescriptionPageState extends State<DescriptionPage> {
         ),
       ),
     );
+    });
+     
   }
 }
 
