@@ -1,3 +1,4 @@
+import 'package:app/pages/home_page.dart';
 import 'package:flutter/material.dart';
 import '../datamanagers/feedback_manager.dart';
 
@@ -68,7 +69,8 @@ class _FeedbackPageState extends State<FeedbackPage> {
                   String feedbackText = feedbackController.text.trim();
 
                   if (feedbackText.isNotEmpty) {
-                    bool success = await feedbackManager.createFeedback(feedbackText);
+                    bool success =
+                        await feedbackManager.createFeedback(feedbackText);
 
                     if (success) {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -78,11 +80,18 @@ class _FeedbackPageState extends State<FeedbackPage> {
                         ),
                       );
 
-                      Navigator.pop(context);
+                      // Navigator.pop(context);
+
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => HomeScreen(),
+                        ),
+                      );
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('Failed to create feedback. Please try again.'),
+                          content: Text(
+                              'Failed to create feedback. Please try again.'),
                           duration: Duration(seconds: 2),
                         ),
                       );

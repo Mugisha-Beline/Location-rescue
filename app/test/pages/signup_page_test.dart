@@ -1,107 +1,66 @@
+import 'package:app/firebase_options.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:app/services/auth_service.dart';
-import 'package:app/pages/signup_page.dart';
+import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
+import 'package:cloud_firestore_mocks/cloud_firestore_mocks.dart';
 
-void main() {
-  testWidgets('SignupPage UI Test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(MaterialApp(
-      home: SignupPage(authService: AuthService()),
-    ));
+import 'package:app/pages/signup_page.dart';  // Import your actual SignupPage widget
 
-    // Verify that the title is present on the screen.
-    expect(find.text('Sign Up Page'), findsOneWidget);
-
-    // Verify the presence of some key widgets.
-    expect(find.byType(AppBar), findsOneWidget);
-    expect(find.byType(Scaffold), findsOneWidget);
-    expect(find.byType(Container), findsOneWidget);
-    expect(find.byType(Card), findsOneWidget);
-    expect(find.byType(SignupForm), findsOneWidget);
-
-    // Verify 2/3 of widgets in SignupPage
-    expect(find.byType(AppBar), findsOneWidget);
-    expect(find.byType(Container), findsOneWidget);
-    expect(find.byType(Card), findsOneWidget);
-    expect(find.byType(SignupForm), findsOneWidget);
+void main() async {
+   // Initialize Firebase before running tests
+  setUpAll(() async {
+    WidgetsFlutterBinding.ensureInitialized();
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
   });
-
-  testWidgets('SignupForm UI Test', (WidgetTester tester) async {
+  testWidgets('Signup page UI and functionality test', (tester) async {
+    final MockFirebaseAuth mockFirebaseAuth = MockFirebaseAuth();
+    final MockFirestoreInstance mockFirestore = MockFirestoreInstance();
+    final AuthService authService = AuthService(
+      auth: mockFirebaseAuth,
+      firestore: mockFirestore,
+    );
     // Build our app and trigger a frame.
-    await tester.pumpWidget(MaterialApp(
-      home: SignupForm(authService: AuthService()),
-    ));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SignupPage(authService: authService),  // Use the actual SignupPage widget here
+      ),
+      await Future.delayed(Duration(seconds: 5)),
+    );
 
-    // Verify that the 'Sign Up' text is present on the screen.
-    expect(find.text('Sign Up'), findsOneWidget);
+    // Find widgets on the signup page
+    final signUpTextFinder = find.text('Sign Up');
+    final fullNameFieldFinder = find.widgetWithText(TextFormField, 'Full Name');
+    final emailFieldFinder = find.widgetWithText(TextFormField, 'Email');
+    final passwordFieldFinder = find.widgetWithText(TextFormField, 'Password');
+    final signUpButtonFinder = find.text('Sign Up');
+    final loginTextFinder = find.text('Already have an account?');
+    final loginButtonFinder = find.text('Login');
 
-    // Verify the presence of some key widgets.
-    expect(find.byType(TextFormField), findsNWidgets(3));
-    expect(find.byType(ElevatedButton), findsOneWidget);
+    // Verify that the required widgets are present on the signup page
+    expect(signUpTextFinder, findsOneWidget);
+    expect(fullNameFieldFinder, findsOneWidget);
+    expect(emailFieldFinder, findsOneWidget);
+    expect(passwordFieldFinder, findsOneWidget);
+    expect(signUpButtonFinder, findsOneWidget);
+    expect(loginTextFinder, findsOneWidget);
+    expect(loginButtonFinder, findsOneWidget);
 
-    // Verify 2/3 of widgets in SignupForm
-    expect(find.byType(TextFormField), findsNWidgets(2));
-    expect(find.byType(ElevatedButton), findsOneWidget);
-  });
+    // Perform tap and enter data to simulate a signup action
+    await tester.enterText(fullNameFieldFinder, 'John Doe');
+    await tester.enterText(emailFieldFinder, 'john.doe@example.com');
+    await tester.enterText(passwordFieldFinder, 'password123');
+    await tester.tap(signUpButtonFinder);
 
-  testWidgets('SignupForm SignUp Process Test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(MaterialApp(
-      home: SignupForm(authService: AuthService()),
-    ));
+    // Allow time for the async signup action to complete
+    await tester.pumpAndSettle();
 
-    // Enter some values into the text fields.
-    await tester.enterText(find.byType(TextFormField).at(0), 'John Doe');
-    await tester.enterText(find.byType(TextFormField).at(1), 'john@example.com');
-    await tester.enterText(find.byType(TextFormField).at(2), 'password123');
+    // Verify the navigation to the login page after successful signup
+    expect(find.text('Login Page'), findsOneWidget);
 
-    // Tap the 'Sign Up' button.
-    await tester.tap(find.byType(ElevatedButton));
-
-    // Wait for the UI to rebuild.
-    await tester.pump();
-
-    // Verify that the loading indicator is displayed.
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
-  });
-
-  testWidgets('SignupForm Login Button Test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(MaterialApp(
-      home: SignupForm(authService: AuthService()),
-    ));
-
-    // Tap the 'Login' button.
-    await tester.tap(find.text('Login'));
-
-    // Wait for the UI to rebuild.
-    await tester.pump();
-
-    // Verify that navigation to the login page occurred.
-    expect(find.text('Login'), findsOneWidget);
-  });
-
-  test('SignupForm SignUp Method Test', () {
-    final authService = AuthService();
-    final signupForm = SignupForm(authService: authService);
-
-    // Set up initial state of the widget
-    signupForm._fullNameController.text = 'John Doe';
-    signupForm._emailController.text = 'john@example.com';
-    signupForm._passwordController.text = 'password123';
-
-    // Call the signUp method
-    signupForm._signUp();
-
-    // Verify that loading state is set
-    expect(signupForm._loading, true);
-
-    // Simulate successful registration
-    signupForm.widget.authService.registerUserWithEmailandPassword = (fullName, email, password) async => true;
-    signupForm._signUp();
-
-    // Verify that loading state is reset after successful registration
-    expect(signupForm._loading, false);
+    // TODO: Add more tests based on your requirements, such as testing error cases, loading state, etc.
   });
 }

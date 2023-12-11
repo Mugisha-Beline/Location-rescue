@@ -1,4 +1,4 @@
-// main.dart
+
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:app/pages/home_page.dart' as HomePage;
@@ -6,6 +6,7 @@ import 'package:app/pages/description.dart';
 import 'package:app/pages/maps.dart';
 import 'package:app/pages/feedback_page.dart';
 import 'package:app/services/auth_service.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'firebase_options.dart';
 import 'pages/signup_page.dart';
 
@@ -29,10 +30,10 @@ class MyApp extends StatelessWidget {
         '/signup': (context) => SignupPage(authService: _authService),
         '/home': (context) => HomePage.HomeScreen(),
         '/description': (context) => DescriptionPage(
-          province: 'Kigali City', // Replace with the actual province
-          district: 'Gasabo', // Replace with the actual district
-          category: 'Hotel', // Replace with the actual category
-        ),
+              province: 'Kigali City', // Replace with the actual province
+              district: 'Gasabo', // Replace with the actual district
+              category: 'Hotel', // Replace with the actual category
+            ),
         '/map': (context) => MapPage(locationItems: []),
         '/feedback': (context) => FeedbackPage(),
       },
@@ -54,8 +55,12 @@ class LoginPage extends StatelessWidget {
       ),
       body: Center(
         child: Container(
-          width: MediaQuery.of(context).size.width > 500 ? 500.0 : MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height > 500 ? 500.0 : MediaQuery.of(context).size.height,
+          width: MediaQuery.of(context).size.width > 500
+              ? 500.0
+              : MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height > 500
+              ? 500.0
+              : MediaQuery.of(context).size.height,
           child: Card(
             elevation: 15.0,
             child: LoginForm(authService: authService),
@@ -89,12 +94,47 @@ class _LoginFormState extends State<LoginForm> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Center(
-              child: Text(
-                'Login',
-                style: TextStyle(
-                  fontSize: 28.0,
-                  color: Colors.green,
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                child: GestureDetector(
+                  onTap: () => AuthService().googleSignInMethod(),
+                  child: Container(
+                    padding: const EdgeInsets.all(18),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFe6aa07),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.login_sharp,
+                          
+                          size: 20,
+                        ),
+                        SizedBox(width: 10),
+                        
+                        ElevatedButton(
+                          onPressed: () async {
+                            if (_key.currentState!.validate()) {
+                              GoogleSignIn.standard();
+                              await Navigator.pushReplacementNamed(context, '/home');
+
+                            }
+                          },
+                          child: Text(
+                            "Sign in with Google",
+                            style: TextStyle(
+                              color: Colors.teal,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -178,7 +218,8 @@ class _LoginFormState extends State<LoginForm> {
     );
   }
 
-  void signInUser() async {
+ void signInUser() async {
+  try {
     dynamic authResult = await widget.authService.loginWithUserNameandPassword(
         _emailController.text, _passwordController.text);
     if (authResult == null) {
@@ -188,5 +229,20 @@ class _LoginFormState extends State<LoginForm> {
       _passwordController.clear();
       await Navigator.pushReplacementNamed(context, '/home');
     }
+  } catch (e) {
+    print('Error during sign-in: $e');
   }
 }
+
+void signInWithGoogle() async {
+  try {
+    dynamic authResult = await widget.authService.googleSignInMethod();
+    if (authResult == null) {
+      print('Google Sign-in error. Could not be able to login');
+    } else {
+      await Navigator.pushReplacementNamed(context, '/home');
+    }
+  } catch (e) {
+    print('Error during Google sign-in: $e');
+  }
+}}

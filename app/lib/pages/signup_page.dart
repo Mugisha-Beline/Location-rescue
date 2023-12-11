@@ -97,6 +97,7 @@ class _SignupFormState extends State<SignupForm> {
   @override
   Widget build(BuildContext context) {
     return Container(
+      
       padding: const EdgeInsets.all(20.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -142,6 +143,8 @@ class _SignupFormState extends State<SignupForm> {
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFe6aa07),
               minimumSize: const Size(double.infinity, 50.0),
+              
+
             ),
             child: _loading ? const CircularProgressIndicator() : const Text('Sign Up'),
           ),
@@ -153,16 +156,16 @@ class _SignupFormState extends State<SignupForm> {
             ),
           ),
           TextButton(
-            onPressed: () async {
-              // Add login logic here
-              Navigator.pushReplacementNamed(context, '/login');
-            },
-            child: const Text(
-              'Login',
-              style: TextStyle(
-                color: Colors.teal,
+             onPressed: () async {
+                await Navigator.of(context).pushReplacementNamed('/login');
+              },
+              child: const Text(
+                'login ',
+                style: TextStyle(
+                  color: Colors.teal,
+                ),
               ),
-            ),
+           
           ),
         ],
       ),
