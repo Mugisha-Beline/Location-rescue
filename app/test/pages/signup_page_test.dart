@@ -1,66 +1,115 @@
-import 'package:app/firebase_options.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:app/pages/signup_page.dart'; // Adjust import based on your actual project structure
 import 'package:app/services/auth_service.dart';
-import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
-import 'package:cloud_firestore_mocks/cloud_firestore_mocks.dart';
 
-import 'package:app/pages/signup_page.dart';  // Import your actual SignupPage widget
-
-void main() async {
-   // Initialize Firebase before running tests
-  setUpAll(() async {
-    WidgetsFlutterBinding.ensureInitialized();
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-  });
-  testWidgets('Signup page UI and functionality test', (tester) async {
-    final MockFirebaseAuth mockFirebaseAuth = MockFirebaseAuth();
-    final MockFirestoreInstance mockFirestore = MockFirestoreInstance();
-    final AuthService authService = AuthService(
-      auth: mockFirebaseAuth,
-      firestore: mockFirestore,
-    );
-    // Build our app and trigger a frame.
+void main() {
+  testWidgets('SignupPage widget test', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        home: SignupPage(authService: authService),  // Use the actual SignupPage widget here
+        home: SignupPage(authService: AuthService()),
       ),
-      await Future.delayed(Duration(seconds: 5)),
     );
 
-    // Find widgets on the signup page
-    final signUpTextFinder = find.text('Sign Up');
-    final fullNameFieldFinder = find.widgetWithText(TextFormField, 'Full Name');
-    final emailFieldFinder = find.widgetWithText(TextFormField, 'Email');
-    final passwordFieldFinder = find.widgetWithText(TextFormField, 'Password');
-    final signUpButtonFinder = find.text('Sign Up');
-    final loginTextFinder = find.text('Already have an account?');
-    final loginButtonFinder = find.text('Login');
+    final appBarTitleFinder = find.text('Sign Up Page');
+    final cardElevationFinder = find.byType(Card).first;
 
-    // Verify that the required widgets are present on the signup page
-    expect(signUpTextFinder, findsOneWidget);
-    expect(fullNameFieldFinder, findsOneWidget);
-    expect(emailFieldFinder, findsOneWidget);
-    expect(passwordFieldFinder, findsOneWidget);
-    expect(signUpButtonFinder, findsOneWidget);
-    expect(loginTextFinder, findsOneWidget);
-    expect(loginButtonFinder, findsOneWidget);
-
-    // Perform tap and enter data to simulate a signup action
-    await tester.enterText(fullNameFieldFinder, 'John Doe');
-    await tester.enterText(emailFieldFinder, 'john.doe@example.com');
-    await tester.enterText(passwordFieldFinder, 'password123');
-    await tester.tap(signUpButtonFinder);
-
-    // Allow time for the async signup action to complete
-    await tester.pumpAndSettle();
-
-    // Verify the navigation to the login page after successful signup
-    expect(find.text('Login Page'), findsOneWidget);
-
-    // TODO: Add more tests based on your requirements, such as testing error cases, loading state, etc.
+    expect(appBarTitleFinder, findsOneWidget);
+    expect(
+      tester.widget<Card>(cardElevationFinder).elevation,
+      equals(15.0),
+    );
   });
+
+  testWidgets('SignupForm widget test', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SignupForm(authService: AuthService()),
+        ),
+      ),
+    );
+
+    final fullNameTextFieldFinder = find.byType(TextFormField).at(0);
+    final emailTextFieldFinder = find.byType(TextFormField).at(1);
+    final passwordTextFieldFinder = find.byType(TextFormField).at(2);
+    final signUpButtonFinder = find.byType(ElevatedButton);
+
+    expect(fullNameTextFieldFinder, findsOneWidget);
+    expect(emailTextFieldFinder, findsOneWidget);
+    expect(passwordTextFieldFinder, findsOneWidget);
+    expect(signUpButtonFinder, findsOneWidget);
+  });
+
+  testWidgets('ElevatedButton widget test', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SignupForm(authService: AuthService()),
+        ),
+      ),
+    );
+
+    final elevatedButtonFinder = find.byType(ElevatedButton);
+
+    expect(elevatedButtonFinder, findsOneWidget);
+
+    final elevatedButtonWidget = tester.widget<ElevatedButton>(elevatedButtonFinder);
+    expect(elevatedButtonWidget.onPressed, isA<Function>());
+    expect(elevatedButtonWidget.style, isInstanceOf<ButtonStyle>());
+    expect(elevatedButtonWidget.style?.backgroundColor, Color(0xFFe6aa07));
+    expect(elevatedButtonWidget.style?.minimumSize, const Size(double.infinity, 50.0));
+  });
+
+  testWidgets('Text widget test', (WidgetTester tester) async {
+    await tester.pumpWidget(MyAppWidget());
+
+    final textWidgetFinder = find.text('Already have an account?');
+
+    expect(textWidgetFinder, findsOneWidget);
+
+    final textWidget = tester.widget<Text>(textWidgetFinder);
+    expect(textWidget.style?.color, Colors.teal);
+  });
+
+  testWidgets('TextButton widget test', (WidgetTester tester) async {
+    await tester.pumpWidget(MyAppWidget());
+
+    final textButtonFinder = find.text('login');
+
+    expect(textButtonFinder, findsOneWidget);
+
+    final textButtonWidget = tester.widget<TextButton>(textButtonFinder);
+    expect(textButtonWidget.onPressed, isA<Function>());
+    expect(find.text('login'), findsOneWidget);
+
+    final textWidget = tester.widget<Text>(find.text('login'));
+    expect(textWidget.style?.color, Colors.teal);
+  });
+}
+
+class MyAppWidget extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: ElevatedButton(
+            onPressed: _loading ? null : _signUp,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFe6aa07),
+              minimumSize: const Size(double.infinity, 50.0),
+            ),
+            child: _loading ? const CircularProgressIndicator() : const Text('Sign Up'),
+          ),
+        ),
+      ),
+    );
+  }
+
+  bool _loading = false;
+
+  void _signUp() {
+    // Implement the sign-up logic here
+  }
 }

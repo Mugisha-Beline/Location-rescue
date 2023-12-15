@@ -220,7 +220,7 @@ class _LoginFormState extends State<LoginForm> {
 
  void signInUser() async {
   try {
-    dynamic authResult = await widget.authService.loginWithUserNameandPassword(
+    dynamic authResult = await widget.authService.loginWithUserNameAndPassword(
         _emailController.text, _passwordController.text);
     if (authResult == null) {
       print('Sign in error. Could not be able to login');

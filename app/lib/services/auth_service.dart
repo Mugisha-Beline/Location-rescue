@@ -1,33 +1,41 @@
 import 'package:app/helper/helper_function.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthService {
-  final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
-  final GoogleSignIn googleSignIn = GoogleSignIn();
+  final _firebaseAuth = FirebaseAuth.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
 
-  final String? uid; // Add uid parameter
+  final String? uid;
 
-  AuthService({this.uid}); // Constructor
+  AuthService({this.uid});
 
-  // login
-  Future loginWithUserNameandPassword(String email, String password) async {
+  // Initialize Firebase
+  static Future<void> initialize() async {
+    await Firebase.initializeApp();
+  }
+
+  // Login with email and password
+  Future<dynamic> loginWithUserNameAndPassword(String email, String password) async {
     try {
-      User user = (await firebaseAuth.signInWithEmailAndPassword(
-              email: email, password: password))
-          .user!;
+      UserCredential userCredential = await _firebaseAuth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
 
-      return true;
-        } on FirebaseAuthException catch (e) {
+      User? user = userCredential.user;
+
+      return user;
+    } on FirebaseAuthException catch (e) {
       return e.message;
     }
   }
 
   // Google Sign-In
-  Future googleSignInMethod() async {
+  Future<dynamic> googleSignInMethod() async {
     try {
-      final GoogleSignInAccount? googleSignInAccount =
-          await googleSignIn.signIn();
+      final GoogleSignInAccount? googleSignInAccount = await _googleSignIn.signIn();
 
       if (googleSignInAccount == null) {
         // The user canceled the sign-in process
@@ -41,9 +49,8 @@ class AuthService {
         idToken: googleSignInAuthentication.idToken,
       );
 
-      final UserCredential authResult =
-          await firebaseAuth.signInWithCredential(credential);
-      final User? user = authResult.user;
+      UserCredential authResult = await _firebaseAuth.signInWithCredential(credential);
+      User? user = authResult.user;
 
       return user;
     } catch (e) {
@@ -51,40 +58,43 @@ class AuthService {
     }
   }
 
-  // register
-  Future registerUserWithEmailandPassword(
+  // Register user with email and password
+  Future<dynamic> registerUserWithEmailandPassword(
       String fullName, String email, String password) async {
     try {
-      User user = (await firebaseAuth.createUserWithEmailAndPassword(
-              email: email, password: password))
-          .user!;
+      UserCredential userCredential = await _firebaseAuth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
 
-      // call our database service to update the user data.
+      User? user = userCredential.user;
+
+      // Call our database service to update the user data.
       await savingUserData(fullName, email);
-      return true;
-        } on FirebaseAuthException catch (e) {
+
+      return user;
+    } on FirebaseAuthException catch (e) {
       return e.message;
     }
   }
 
-  // signout
-  Future signOut() async {
+  // Sign out
+  Future<void> signOut() async {
     try {
       await HelperFunctions.saveUserLoggedInStatus(false);
       await HelperFunctions.saveUserEmailSF("");
       await HelperFunctions.saveUserNameSF("");
-      await firebaseAuth.signOut();
+      await _firebaseAuth.signOut();
     } catch (e) {
-      return null;
+      print(e.toString());
     }
   }
 
-  // savingUserData method
+  // Saving user data method
   Future<void> savingUserData(String fullName, String email) async {
     try {
       // Implement your logic to save user data to the database
       // You can use this.uid to access the uid parameter
-
     } catch (e) {
       print(e.toString());
     }

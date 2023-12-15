@@ -1,4 +1,5 @@
-import 'package:app/pages/Feedback_page.dart';
+
+import 'package:app/pages/feedback_page.dart';
 import 'package:flutter/material.dart';
 import '../datamanagers/database_manager.dart';
 
